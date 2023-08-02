@@ -45,7 +45,7 @@ void AppWindow::updateQuadPosition()
 
 	//cc.m_world *= temp;
 
-	cc.m_world.setScale(Vec3(1, 1, 1));
+	cc.m_world.setScale(Vec3(m_scale, m_scale, m_scale));
 
 	temp.setIdentity();
 	temp.setRotationZ(0.0f);
@@ -208,6 +208,16 @@ void AppWindow::onDestroy()
 	GraphicsEngine::get()->release();
 }
 
+void AppWindow::onFocus()
+{
+	InputSystem::get()->addListener(this);
+}
+
+void AppWindow::onKillFocus()
+{
+	InputSystem::get()->removeListener(this);
+}
+
 void AppWindow::onKeyDown(int key)
 {
 	if (key == 'W')
@@ -231,4 +241,28 @@ void AppWindow::onKeyDown(int key)
 void AppWindow::onKeyUp(int key)
 {
 	
+}
+
+void AppWindow::onMouseMove(const Point& delta_mouse_pos)
+{
+	m_rot_x -= delta_mouse_pos.y * m_delta_time;
+	m_rot_y -= delta_mouse_pos.x * m_delta_time;
+}
+
+void AppWindow::onLeftMouseDown(const Point& mouse_pos)
+{
+	m_scale += 0.25f;
+}
+
+void AppWindow::onRightMouseDown(const Point& mouse_pos)
+{
+	m_scale -= 0.25f;
+}
+
+void AppWindow::onLeftMouseUp(const Point& mouse_pos)
+{
+}
+
+void AppWindow::onRightMouseUp(const Point& mouse_pos)
+{
 }
