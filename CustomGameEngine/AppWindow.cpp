@@ -30,9 +30,11 @@ void AppWindow::onCreate()
 
 	vertex list[] =
 	{
-		{-0.5f, -0.5f, 0.0f},
-		{ 0.0f,  0.5f, 0.0f},
-		{ 0.5f, -0.5f, 0.0f}
+		
+		{-0.5f, -0.5f, 0.0f}, 
+		{-0.5f,  0.5f, 0.0f}, 
+		{ 0.5f, -0.5f, 0.0f},
+		{ 0.5f,  0.5f, 0.0f}
 	};
 
 	m_vb = GraphicsEngine::get()->createVertexBuffer();
@@ -41,12 +43,13 @@ void AppWindow::onCreate()
 	GraphicsEngine::get()->createShaders();
 
 	void* shader_byte_code = nullptr;
-	UINT size_shader = 0;
-	GraphicsEngine::get()->getShaderBufferAndSize(&shader_byte_code, &size_shader);
+	size_t size_shader = 0;
+	GraphicsEngine::get()->compileVertexShader(L"VertexShader.hlsl","main",&shader_byte_code,&size_shader);
 
+	m_vs = GraphicsEngine::get()->createVertexShader(shader_byte_code, size_shader);
 	m_vb->load(list, sizeof(vertex), size_list, shader_byte_code, size_shader);
 
-
+	GraphicsEngine::get()->releaseCompiledShader();
 }
 
 void AppWindow::onUpdate()
@@ -60,11 +63,12 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
 	//SET DEFAULT SHADER IN THE GRAPHICS PIPELINE TO BE ABLE TO DRAW
 	GraphicsEngine::get()->setShaders();
+	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexShader(m_vs);
 	//SET  VERTICES
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexBuffer(m_vb);
 
 	// DRAW
-	GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleList(m_vb->getSizeVertexList(), 0);
+	GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleStrip(m_vb->getSizeVertexList(), 0);
 	m_swap_chain->present(true);
 }
 
