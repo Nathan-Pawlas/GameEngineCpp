@@ -3,6 +3,7 @@
 
 class SwapChain;
 class VertexBuffer;
+class ConstantBuffer;
 class VertexShader;
 class PixelShader;
 
@@ -13,6 +14,8 @@ public:
 	void clearRenderTargetColor(SwapChain* swap_chain, float r, float g, float b, float a);
 
 	void setVertexBuffer(VertexBuffer* vertex_buffer);
+	void setConstantBuffer(VertexShader* vertex_shader, ConstantBuffer* buffer);
+	void setConstantBuffer(PixelShader* vertex_shader, ConstantBuffer* buffer);
 
 	void drawTriangleList(UINT vertex_count,UINT start_vertex_index );
 	void drawTriangleStrip(UINT vertex_count, UINT start_vertex_index);
@@ -26,4 +29,7 @@ public:
 	~DeviceContext();
 private:
 	ID3D11DeviceContext* m_device_context;
+
+private:
+	friend class ConstantBuffer;
 };

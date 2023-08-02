@@ -1,17 +1,32 @@
 #include "AppWindow.h"
+#include <Windows.h>
+#include "Vec3.h"
+#include "Mat4.h"
 
-struct vec3
-{
-	float x, y, z;
-};
 
 struct vertex
 {
-	vec3 position;
-	vec3 color;
+	Vec3 position;
+	Vec3 position1;
+	Vec3 color;
+	Vec3 color1;
 };
 
+__declspec(align(16))
+struct constant
+{
+	Mat4 m_world;
+	Mat4 m_view;
+	Mat4 m_projection;
+	float m_angle;
+};
+
+
 AppWindow::AppWindow()
+{
+}
+
+void AppWindow::updateQuadPosition()
 {
 }
 
@@ -31,11 +46,10 @@ void AppWindow::onCreate()
 
 	vertex list[] =
 	{
-		// X      Y     Z        R   G  B
-		{-0.5f, -0.5f, 0.0f,     1,  0, 0}, 
-		{-0.5f,  0.5f, 0.0f,     0,  1, 0},
-		{ 0.5f, -0.5f, 0.0f,     0,  0, 1},
-		{ 0.5f,  0.5f, 0.0f,     1,  1, 0}
+		{Vec3(-0.5f, -0.5f, 0.0f),   Vec3(-0.32f, -0.11f,  0),     Vec3(1,  0,  0),   Vec3(0,  1,  1)},
+		{Vec3(-0.5f,  0.5f, 0.0f),   Vec3(-0.11f,  0.78f,  0),     Vec3(0,  1,  0),   Vec3(1,  0,  0)},
+		{Vec3(0.5f, -0.5f, 0.0f),    Vec3( 0.75f, -0.73f,  0),     Vec3(0,  0,  1),   Vec3(0,  1,  0)},
+		{Vec3(0.5f,  0.5f, 0.0f),    Vec3( 0.88f,  0.77f,  0),     Vec3(1,  1,  0),   Vec3(0,  0,  1)}
 	};
 
 	m_vb = GraphicsEngine::get()->createVertexBuffer();
@@ -54,10 +68,18 @@ void AppWindow::onCreate()
 
 	// ------------------ PIXEL SHADER -----------------------------------
 	GraphicsEngine::get()->compilePixelShader(L"PixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
-
 	m_ps = GraphicsEngine::get()->createPixelShader(shader_byte_code, size_shader);
 
 	GraphicsEngine::get()->releaseCompiledShader();
+
+
+	// ----------------- CONSTANT BUFFER --------------------------------
+	constant cc;
+	cc.m_angle = 0;
+
+	m_cb = GraphicsEngine::get()->createConstantBuffer();
+	m_cb->load(&cc, sizeof(constant));
+
 }
 
 void AppWindow::onUpdate()
@@ -71,7 +93,20 @@ void AppWindow::onUpdate()
 	RECT rc = this->getClientWindowRect();
 	GraphicsEngine::get()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
 
-	//SET DEFAULT SHADER IN THE GRAPHICS PIPELINE TO BE ABLE TO DRAW
+	unsigned long new_time = 0;
+	if (m_old_time)
+		new_time = ::GetTickCount() - m_old_time;
+	m_delta_time = new_time / 1000.0f;
+	m_old_time = ::GetTickCount();
+	m_angle += 1.57f * m_delta_time;
+	constant cc;
+	cc.m_angle = m_angle;
+	m_cb->update(GraphicsEngine::get()->getImmediateDeviceContext(), &cc);
+
+	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_vs, m_cb);
+	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_ps, m_cb);
+
+	//SET SHADER IN THE GRAPHICS PIPELINE TO BE ABLE TO DRAW
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexShader(m_vs);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setPixelShader(m_ps);
 
