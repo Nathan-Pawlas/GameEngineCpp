@@ -9,13 +9,14 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "InputListener.h"
+#include "Mat4.h"
 
 class AppWindow : public Window, public InputListener
 {
 public:
 	AppWindow();
 
-	void updateQuadPosition();
+	void update();
 
 	~AppWindow();
 
@@ -29,7 +30,7 @@ public:
 	// Inherited via InputListener
 	virtual void onKeyDown(int key) override;
 	virtual void onKeyUp(int key) override;
-	virtual void onMouseMove(const Point& delta_mouse_pos) override;
+	virtual void onMouseMove(const Point& mouse_pos) override;
 	virtual void onLeftMouseDown(const Point& mouse_pos) override;
 	virtual void onRightMouseDown(const Point& mouse_pos) override;
 	virtual void onLeftMouseUp(const Point& mouse_pos) override;
@@ -52,8 +53,15 @@ private:
 	float m_delta_scale;
 	float m_delta_rot;
 
+	Mat4 m_world_cam;
+
+	float m_forward = 0.0f;
+	float m_right = 0.0f;
+
 	float m_rot_x = 0.0f;
 	float m_rot_y = 0.0f;
 
 	float m_scale = 1;
+
+	float m_cam_speed = 0.05f;
 };

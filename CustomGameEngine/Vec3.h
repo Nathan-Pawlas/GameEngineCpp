@@ -23,6 +23,16 @@ public:
 		return v;
 	}
 
+	Vec3 operator *(float num)
+	{
+		return Vec3((x * num), (y * num), (z * num));
+	}
+
+	Vec3 operator +(Vec3 vec)
+	{
+		return Vec3((x + vec.x), (y + vec.y), (z + vec.z));
+	}
+
 	~Vec3()
 	{
 	}
