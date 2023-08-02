@@ -157,6 +157,7 @@
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="DeviceContext.h" />
     <ClInclude Include="GraphicsEngine.h" />
+    <ClInclude Include="Mat4.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="Vec3.h" />

@@ -14,6 +14,15 @@ public:
 	{
 	}
 
+	static Vec3 lerp(const Vec3& start, const Vec3& end, float delta)
+	{
+		Vec3 v;
+		v.x = start.x * (1.0f - delta) + end.x * (delta);
+		v.y = start.y * (1.0f - delta) + end.y * (delta);
+		v.z = start.z * (1.0f - delta) + end.z * (delta);
+		return v;
+	}
+
 	~Vec3()
 	{
 	}
