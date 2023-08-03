@@ -1,15 +1,10 @@
 #include "ConstantBuffer.h"
-#include "GraphicsEngine.h"
+#include "RenderSystem.h"
 #include "DeviceContext.h"
+#include <exception>
 
-ConstantBuffer::ConstantBuffer()
+ConstantBuffer::ConstantBuffer(void* buffer, UINT size_buffer, RenderSystem* system) :m_system(system)
 {
-}
-
-bool ConstantBuffer::load(void* buffer, UINT size_buffer)
-{
-	if (m_buffer) { m_buffer->Release(); }
-
 	D3D11_BUFFER_DESC buff_desc = {};
 	buff_desc.Usage = D3D11_USAGE_DEFAULT;
 	buff_desc.ByteWidth = size_buffer;
@@ -21,11 +16,11 @@ bool ConstantBuffer::load(void* buffer, UINT size_buffer)
 	init_data.pSysMem = buffer;
 
 
-	HRESULT res = GraphicsEngine::get()->m_d3d_device->CreateBuffer(&buff_desc, &init_data, &m_buffer); //Constant Buffer (m_buffer)
-	if (FAILED(res)) { return false; }
-
-
-	return true;
+	HRESULT res = m_system->m_d3d_device->CreateBuffer(&buff_desc, &init_data, &m_buffer); //Constant Buffer (m_buffer)
+	if (FAILED(res))
+	{
+		throw std::exception("ConstantBuffer not created successfully");
+	}
 }
 
 void ConstantBuffer::update(DeviceContext* context, void* buffer)
@@ -33,13 +28,7 @@ void ConstantBuffer::update(DeviceContext* context, void* buffer)
 	context->m_device_context->UpdateSubresource(this->m_buffer, NULL, NULL, buffer, NULL, NULL);
 }
 
-bool ConstantBuffer::release()
-{
-	if (m_buffer) { m_buffer->Release(); }
-	delete this;
-	return true;
-}
-
 ConstantBuffer::~ConstantBuffer()
 {
+	if (m_buffer) { m_buffer->Release(); }
 }

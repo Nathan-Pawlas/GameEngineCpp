@@ -1,11 +1,11 @@
 #pragma once
-#include<memory>
-#include <sstream>
-#include <iostream>
-#include <stdexcept>
 
-
-typedef float f32;
-typedef int i32;
-typedef unsigned int ui32;
-
+class SwapChain;
+class DeviceContext;
+class VertexBuffer;
+class IndexBuffer;
+class ConstantBuffer;
+class VertexShader;
+class PixelShader;
+class RenderSystem;
+class GraphicsEngine;
