@@ -57,7 +57,7 @@ void AppWindow::update()
 
 	Vec3 new_pos = m_world_cam.getTranslation() + (world_cam.getZDirection() * (m_forward * m_cam_speed));
 
-	new_pos = new_pos + (world_cam.getXDirectione() * (m_right * m_cam_speed));
+	new_pos = new_pos + (world_cam.getXDirection() * (m_right * m_cam_speed));
 
 	world_cam.setTranslation(new_pos);
 

@@ -1,16 +1,15 @@
 #pragma once
+#include <memory>
 #include "Vec3.h"
 #include "Vec4.h"
-#include <memory>
 
 class Mat4
 {
 public:
 	Mat4()
 	{
-		setIdentity();
 	}
-	
+
 	void setIdentity()
 	{
 		::memset(mat, 0, sizeof(float) * 16);
@@ -108,6 +107,7 @@ public:
 		this->setMatrix(out);
 	}
 
+
 	void operator *=(const Mat4& matrix)
 	{
 		Mat4 out;
@@ -128,16 +128,14 @@ public:
 		::memcpy(mat, matrix.mat, sizeof(float) * 16);
 	}
 
-	Vec3 getZDirection() 
+	Vec3 getZDirection()
 	{
 		return Vec3(mat[2][0], mat[2][1], mat[2][2]);
 	}
-
-	Vec3 getXDirectione()
+	Vec3 getXDirection()
 	{
 		return Vec3(mat[0][0], mat[0][1], mat[0][2]);
 	}
-
 	Vec3 getTranslation()
 	{
 		return Vec3(mat[3][0], mat[3][1], mat[3][2]);
@@ -154,6 +152,7 @@ public:
 		mat[3][2] = (-znear * zfar) / (zfar - znear);
 	}
 
+
 	void setOrthoLH(float width, float height, float near_plane, float far_plane)
 	{
 		setIdentity();
@@ -164,8 +163,9 @@ public:
 	}
 
 	~Mat4()
-	{}
-	
+	{
+	}
+
 public:
-	float mat[4][4];
+	float mat[4][4] = {};
 };
