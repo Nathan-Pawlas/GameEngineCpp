@@ -15,9 +15,6 @@ class AppWindow : public Window, public InputListener
 {
 public:
 	AppWindow();
-
-	void update();
-
 	~AppWindow();
 
 	// Inherited via Window
@@ -36,6 +33,10 @@ public:
 	virtual void onLeftMouseUp(const Point& mouse_pos) override;
 	virtual void onRightMouseUp(const Point& mouse_pos) override;
 
+	void update();
+	void updateModel();
+	void updateCamera();
+	void updateSkybox();
 	void drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vs, const PixelShaderPtr& ps, 
 		ConstantBufferPtr& cb, const TexturePtr& tex);
 
@@ -45,8 +46,12 @@ private:
 	IndexBufferPtr m_ib;
 	VertexShaderPtr m_vs;
 	PixelShaderPtr m_ps;
+	PixelShaderPtr m_sky_ps;
 	ConstantBufferPtr m_cb;
-	TexturePtr m_wood_tex;
+	ConstantBufferPtr m_sky_cb;
+
+	TexturePtr m_tex;
+	TexturePtr m_sky_tex;
 
 	MeshPtr m_mesh;
 	MeshPtr m_sky_mesh;;
@@ -60,6 +65,8 @@ private:
 	float m_delta_rot;
 
 	Mat4 m_world_cam;
+	Mat4 m_view;
+	Mat4 m_proj_view;
 
 	float m_forward = 0.0f;
 	float m_right = 0.0f;
@@ -71,5 +78,5 @@ private:
 
 	float m_scale = 1;
 
-	float m_cam_speed = 0.01f;
+	float m_cam_speed = 0.03f;
 };
