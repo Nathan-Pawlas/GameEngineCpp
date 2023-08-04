@@ -1,14 +1,15 @@
 #include "AppWindow.h"
 #include <Windows.h>
 #include "Vec3.h"
+#include "Vec2.h"
 #include "Mat4.h"
 #include "InputSystem.h"
+#include "Mesh.h"
 
 struct vertex
 {
 	Vec3 position;
-	Vec3 color;
-	Vec3 color1;
+	Vec2 texcoord;
 };
 
 
@@ -18,7 +19,8 @@ struct constant
 	Mat4 m_world;
 	Mat4 m_view;
 	Mat4 m_proj;
-	unsigned int m_time;
+	Vec4 m_light_dir;
+	Vec4 m_camera_pos;
 };
 
 
@@ -30,17 +32,24 @@ void AppWindow::update()
 {
 	// ------------- GET DELTA TIME --------------------
 	constant cc;
-	cc.m_time = ::GetTickCount();
+	//cc.m_time = ::GetTickCount();
 
 	m_delta_pos += m_delta_time / 10.0f;
 	if (m_delta_pos > 1.0f)
 		m_delta_pos = 0;
 
 	Mat4 temp;
+	Mat4 m_light_rot;
 
 	m_delta_scale += m_delta_time / 0.5f;
 
 	cc.m_world.setIdentity();
+	m_light_rot.setIdentity();
+
+	// ------------------- LIGHT MATRIX -----------------
+	m_light_rot_y += 0.785f * m_delta_time;
+	m_light_rot.setRotationY(m_light_rot_y);
+	cc.m_light_dir = m_light_rot.getZDirection();
 
 	// ------------------- CAMERA MOVEMENT --------------
 	Mat4 world_cam;
@@ -61,6 +70,7 @@ void AppWindow::update()
 
 	world_cam.setTranslation(new_pos);
 
+	cc.m_camera_pos = new_pos;
 	m_world_cam = world_cam;
 
 	world_cam.inverse(); //Turns Camera Matrix Into View Matrix
@@ -99,23 +109,80 @@ void AppWindow::onCreate()
 	InputSystem::get()->addListener(this);
 	InputSystem::get()->showCursor(false);
 
+
+	// ------------ RESOURCE RETRIEVAL ------------
+
+	m_wood_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\suzanne.obj");
+	m_sky_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
+
+	// ------------ VERTEX DATA ---------------
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
-	m_world_cam.setTranslation(Vec3(0, 0, -2));
+	m_world_cam.setTranslation(Vec3(0, 0, -1));
+
+	Vec3 position_list[] =
+	{
+		{ Vec3(-0.5f,-0.5f,-0.5f)},
+		{ Vec3(-0.5f,0.5f,-0.5f) },
+		{ Vec3(0.5f,0.5f,-0.5f) },
+		{ Vec3(0.5f,-0.5f,-0.5f)},
+
+		//BACK FACE
+		{ Vec3(0.5f,-0.5f,0.5f) },
+		{ Vec3(0.5f,0.5f,0.5f) },
+		{ Vec3(-0.5f,0.5f,0.5f)},
+		{ Vec3(-0.5f,-0.5f,0.5f) }
+	};
+
+	Vec2 texcoord_list[] =
+	{
+		{ Vec2(0.0f,0.0f) },
+		{ Vec2(0.0f,1.0f) },
+		{ Vec2(1.0f,0.0f) },
+		{ Vec2(1.0f,1.0f) }
+	};
+
+
 
 	vertex vertex_list[] =
 	{
+		//X - Y - Z
 		//FRONT FACE
-		{Vec3(-0.5f,-0.5f,-0.5f),   Vec3(1,  0,  0),   Vec3(1,  0,  0)}, //v0
-		{Vec3(-0.5f, 0.5f,-0.5f),   Vec3(0,  1,  0),   Vec3(0,  1,  0)}, //v1
-		{Vec3( 0.5f, 0.5f,-0.5f),   Vec3(0,  0,  1),   Vec3(0,  0,  1)}, //v2
-		{Vec3( 0.5f,-0.5f,-0.5f),   Vec3(1,  1,  0),   Vec3(1,  1,  0)}, //v3
-		//BACK FACE
-		{Vec3( 0.5f,-0.5f, 0.5f),   Vec3(1,  0,  1),   Vec3(1,  0,  1)}, //v4
-		{Vec3( 0.5f, 0.5f, 0.5f),   Vec3(0,  1,  1),   Vec3(0,  1,  1)}, //v5
-		{Vec3(-0.5f, 0.5f, 0.5f),   Vec3(0,  0,  1),   Vec3(0,  0,  1)}, //v6
-		{Vec3(-0.5f,-0.5f, 0.5f),   Vec3(0,  1,  0),   Vec3(0,  1,  0)}  //v7
+		{ position_list[0],texcoord_list[1] },
+		{ position_list[1],texcoord_list[0] },
+		{ position_list[2],texcoord_list[2] },
+		{ position_list[3],texcoord_list[3] },
+
+
+		{ position_list[4],texcoord_list[1] },
+		{ position_list[5],texcoord_list[0] },
+		{ position_list[6],texcoord_list[2] },
+		{ position_list[7],texcoord_list[3] },
+
+
+		{ position_list[1],texcoord_list[1] },
+		{ position_list[6],texcoord_list[0] },
+		{ position_list[5],texcoord_list[2] },
+		{ position_list[2],texcoord_list[3] },
+
+		{ position_list[7],texcoord_list[1] },
+		{ position_list[0],texcoord_list[0] },
+		{ position_list[3],texcoord_list[2] },
+		{ position_list[4],texcoord_list[3] },
+
+		{ position_list[3],texcoord_list[1] },
+		{ position_list[2],texcoord_list[0] },
+		{ position_list[5],texcoord_list[2] },
+		{ position_list[4],texcoord_list[3] },
+
+		{ position_list[7],texcoord_list[1] },
+		{ position_list[6],texcoord_list[0] },
+		{ position_list[1],texcoord_list[2] },
+		{ position_list[0],texcoord_list[3] }
+
+
 	};
 	UINT size_vertex_list = ARRAYSIZE(vertex_list);
 
@@ -129,17 +196,17 @@ void AppWindow::onCreate()
 		4,5,6,
 		6,7,4,
 		//TOP
-		1,6,5,
-		5,2,1,
+		8,9,10,
+		10,11,8,
 		//BOTTOM
-		7,0,3,
-		3,4,7,
+		12,13,14,
+		14,15,12,
 		//RIGHT
-		3,2,5,
-		5,4,3,
+		16,17,18,
+		18,19,16,
 		//LEFT
-		7,6,1,
-		1,0,7
+		20,21,22,
+		22,23,20
 	};
 	UINT size_index_list = ARRAYSIZE(index_list);
 	m_ib = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(index_list, size_index_list);
@@ -164,7 +231,7 @@ void AppWindow::onCreate()
 
 	// ----------------- CONSTANT BUFFER --------------------------------
 	constant cc;
-	cc.m_time = 0;
+	//cc.m_time = 0;
 
 	m_cb = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
 }
@@ -176,7 +243,7 @@ void AppWindow::onUpdate()
 
 	//CLEAR THE RENDER TARGET 
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain,
-		0, 0.3f, 0.4f, 1);
+		0.2f, 0.3f, 0.5f, 1);
 	//SET VIEWPORT OF RENDER TARGET IN WHICH WE HAVE TO DRAW
 	RECT rc = this->getClientWindowRect();
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
@@ -184,22 +251,8 @@ void AppWindow::onUpdate()
 
 	update();
 
+	drawMesh(m_mesh, m_vs, m_ps, m_cb, m_wood_tex);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(m_vs, m_cb);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(m_ps, m_cb);
-
-	//SET DEFAULT SHADER IN THE GRAPHICS PIPELINE TO BE ABLE TO DRAW
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(m_vs);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(m_ps);
-
-
-	//SET THE VERTICES OF THE TRIANGLE TO DRAW
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(m_vb);
-	//SET INDICES
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(m_ib);
-
-	// FINALLY DRAW THE TRIANGLE
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(m_ib->getSizeIndexList(), 0, 0);
 	m_swap_chain->present(true);
 
 
@@ -244,7 +297,7 @@ void AppWindow::onKeyDown(int key)
 	}
 	else if (key == VK_SHIFT)
 	{
-		m_cam_speed = 0.3f;
+		m_cam_speed = 0.03f;
 	}
 }
 
@@ -252,7 +305,7 @@ void AppWindow::onKeyUp(int key)
 {
 	m_forward = 0.0f;
 	m_right = 0.0f;
-	m_cam_speed = 0.05f;
+	m_cam_speed = 0.01f;
 }
 
 void AppWindow::onMouseMove(const Point& mouse_pos)
@@ -282,4 +335,25 @@ void AppWindow::onLeftMouseUp(const Point& mouse_pos)
 
 void AppWindow::onRightMouseUp(const Point& mouse_pos)
 {
+}
+
+void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vs, const PixelShaderPtr& ps, ConstantBufferPtr& cb, const TexturePtr& tex)
+{
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(vs, cb);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(ps, cb);
+
+	//SET DEFAULT SHADER IN THE GRAPHICS PIPELINE TO BE ABLE TO DRAW
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(vs);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(ps);
+
+	//TEXTURES
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(ps, tex);
+
+	//SET THE VERTICES OF THE Mesh TO DRAW
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
+	//SET INDICES
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
+
+	// FINALLY DRAW THE TRIANGLE
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
 }

@@ -36,6 +36,8 @@ public:
 	virtual void onLeftMouseUp(const Point& mouse_pos) override;
 	virtual void onRightMouseUp(const Point& mouse_pos) override;
 
+	void drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vs, const PixelShaderPtr& ps, 
+		ConstantBufferPtr& cb, const TexturePtr& tex);
 
 private:
 	SwapChainPtr m_swap_chain;
@@ -44,6 +46,10 @@ private:
 	VertexShaderPtr m_vs;
 	PixelShaderPtr m_ps;
 	ConstantBufferPtr m_cb;
+	TexturePtr m_wood_tex;
+
+	MeshPtr m_mesh;
+	MeshPtr m_sky_mesh;;
 
 	long m_old_delta;
 	long m_new_delta;
@@ -61,7 +67,9 @@ private:
 	float m_rot_x = 0.0f;
 	float m_rot_y = 0.0f;
 
+	float m_light_rot_y = 0.0f;
+
 	float m_scale = 1;
 
-	float m_cam_speed = 0.05f;
+	float m_cam_speed = 0.01f;
 };

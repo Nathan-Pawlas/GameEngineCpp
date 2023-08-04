@@ -13,6 +13,9 @@ public:
 	Vec4(const Vec4& vec) :x(vec.x), y(vec.y), z(vec.z), w(vec.w)
 	{
 	}
+	Vec4(const Vec3& vec) : x(vec.x), y(vec.y), z(vec.z), w(1.0)
+	{
+	}
 
 	void cross(Vec4& v1, Vec4& v2, Vec4& v3)
 	{

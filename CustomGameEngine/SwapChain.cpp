@@ -24,7 +24,7 @@ SwapChain::SwapChain(HWND hwnd, UINT width, UINT height, RenderSystem* system) :
 
 	if (FAILED(hr))
 	{
-		throw std::exception("SwapChain not created successfully, failed to create SwapChain");
+		throw std::exception("SwapChain not created successfully");
 	}
 
 	//--------------------------------
@@ -33,15 +33,41 @@ SwapChain::SwapChain(HWND hwnd, UINT width, UINT height, RenderSystem* system) :
 
 	if (FAILED(hr))
 	{
-		throw std::exception("SwapChain not created successfully, Failed to GetBuffer");
+		throw std::exception("Render Buffer not created successfully");
 	}
 
 	hr = device->CreateRenderTargetView(buffer, NULL, &m_rtv);
 	buffer->Release();
-
 	if (FAILED(hr))
 	{
-		throw std::exception("SwapChain not created successfully, Failed to create RenderTargetView");
+		throw std::exception("Render Target View not created successfully");
+	}
+
+	// ------------------- DEPTH/STENCIL BUFFERS ----------------------
+	D3D11_TEXTURE2D_DESC tex_desc = {};
+	tex_desc.Width = width;
+	tex_desc.Height = height;
+	tex_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	tex_desc.MipLevels = 1;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.MiscFlags = 0;
+	tex_desc.ArraySize = 1;
+	tex_desc.CPUAccessFlags = 0;
+
+	hr = device->CreateTexture2D(&tex_desc, nullptr, &buffer);
+	if (FAILED(hr))
+	{
+		throw std::exception("Depth Texture not created successfully");
+	}
+
+	hr = device->CreateDepthStencilView(buffer, NULL, &m_dsv);
+	buffer->Release();
+	if (FAILED(hr))
+	{
+		throw std::exception("Depth/Stencil View not created successfully");
 	}
 }
 
