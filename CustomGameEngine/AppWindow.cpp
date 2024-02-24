@@ -5,6 +5,9 @@
 #include "Mat4.h"
 #include "InputSystem.h"
 #include "Mesh.h"
+#include <stdlib.h>
+
+int status = 0;
 
 struct vertex
 {
@@ -46,7 +49,7 @@ void AppWindow::onCreate()
 	// ------------ RESOURCE RETRIEVAL ------------
 
 	m_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\suzanne.obj");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\statue.obj");
 
 	m_sky_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sky.jpg");
 	m_sky_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
@@ -144,6 +147,10 @@ void AppWindow::onKeyDown(int key)
 	else if (key == VK_SHIFT)
 	{
 		m_cam_speed = 0.08f;
+	}
+	else if (key == 'Q')
+	{
+		exit(status);
 	}
 }
 

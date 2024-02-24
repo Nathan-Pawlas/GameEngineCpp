@@ -28,7 +28,7 @@ float4 psmain(PS_INPUT input) : SV_TARGET
 
 	//DIFFUSE LIGHT
 	float kd = 1.0;
-	float3 id = float3(1.0, 1.0, 1.0);
+	float3 id = float3(0.0, 1.0, 1.0);
 	float diffuse_amount = max(0.0, dot(m_light_dir.xyz, input.normal));
 
 	float3 diffuse_light = kd * diffuse_amount * id;
